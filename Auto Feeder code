@@ -31,3 +31,57 @@ void setup() {
   myservo.write(0);
   delay(1000); // Allow servo to reach the initial position
 }
+
+void loop() {
+  DateTime now = rtc.now();
+
+  // Print current date and time to Serial Monitor
+  Serial.print(now.year(), DEC);
+  Serial.print('/');
+  Serial.print(now.month(), DEC);
+  Serial.print('/');
+  Serial.print(now.day(), DEC);
+  Serial.print(" ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  Serial.println();
+
+  // Check if it's time to feed the fish
+  if (now.hour() == feedHour && now.minute() == feedMinute && !hasFedToday) {
+    Serial.println("Feeding time!");
+    feedFish();
+    hasFedToday = true;
+  }
+
+  // Reset hasFedToday at midnight
+  if (now.hour() == 0 && now.minute() == 0 && now.second() == 0) {
+    hasFedToday = false;
+  }
+
+  delay(1000);
+}
+
+void feedFish() {
+  feedCounter = 0;
+
+  while (feedCounter < 1) {
+    // Move servo to 40 degrees
+    for (int pos = 0; pos <= 40; pos += 1) {
+      myservo.write(pos);
+      delay(20);
+    }
+
+    // Move servo back to 0 degrees
+    for (int pos = 40; pos >= 0; pos -= 1) {
+      myservo.write(pos);
+      delay(20);
+    }
+
+    feedCounter++;
+    delay(1000); // Delay between the several feeding operations
+  }
+}
+
